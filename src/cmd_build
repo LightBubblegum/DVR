@@ -1,0 +1,1 @@
+g++ -std=c++17 -I./gpioManip/ -I./display/ -I./display/spfd54124b -I./ -L/usr/local/lib -o main  main.cpp ./display/display.cpp ./display/spfd54124b/spfd54124b.cpp ./gpioManip/gpio_manip.cpp -lwiringPi -lwiringPiDev -lpthread -lm

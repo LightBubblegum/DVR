@@ -6,6 +6,7 @@
 #ifndef __GPIO_MANIP_H__
 #define __GPIO_MANIP_H__
 
+#include <wiringPi.h>
 #include <array>
 #include <iterator>
 #include <exception>
@@ -27,7 +28,7 @@ namespace Gpio
     class IGpioManip
     {
     public:
-        virtual ~IGpioManip();
+        virtual ~IGpioManip() {};
         virtual void cfg(int pin, gpio_mode_t mode) = 0;
         virtual gpio_state_t read(int pin) = 0;
         virtual void write(int pin, gpio_state_t state) = 0;
@@ -36,6 +37,8 @@ namespace Gpio
     class OPiGpio : public IGpioManip
     {
     public:
+        OPiGpio() {};
+        ~OPiGpio() {};
         void cfg(int pin, gpio_mode_t mode) override;
         gpio_state_t read(int pin) override;
         void write(int pin, gpio_state_t state) override;
@@ -48,17 +51,16 @@ namespace Gpio
         static constexpr int TOTAL_GPIO = 32;
         static constexpr int TOTAL_NONEXISTED_GPIO = 4;
         static constexpr std::array<int, TOTAL_NONEXISTED_GPIO> NONEXISTED_PINS = { 17,18,19,20 };
-        static std::array<gpio_mode_t, TOTAL_GPIO> *last_mode;
-        static OPiGpio opi_gpio;
-
-        OPi1GpioManager() {};
+        OPiGpio opi_gpio;
+        std::array<gpio_mode_t, TOTAL_GPIO> last_mode;
+ 
+        virtual ~OPi1GpioManager() {};
+        OPi1GpioManager();
         OPi1GpioManager( const OPi1GpioManager& );
         OPi1GpioManager& operator = ( OPi1GpioManager& );
     public:
         static OPi1GpioManager& get_instance() {
             static OPi1GpioManager instace;
-            static std::array<gpio_mode_t, TOTAL_GPIO> lm;
-            last_mode = &lm;
             return instace;
         }
         static bool is_manipulated(int pin);

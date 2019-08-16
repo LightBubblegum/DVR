@@ -2,7 +2,6 @@
  * 
 */
 
-#include <wiringPi.h>
 #include <cassert>
 #include "gpio_manip.h"
 
@@ -12,7 +11,6 @@ namespace Gpio
     void OPiGpio::cfg(int pin, gpio_mode_t mode)
     {
         assert (mode == GPIO_IN || mode == GPIO_OUT);
-        //assert (pin >= 0);
 
         int pin_mode;
         switch (mode)
@@ -33,19 +31,21 @@ namespace Gpio
 
     gpio_state_t OPiGpio::read(int pin)
     {
-        //assert (pin >= 0);
-
         return digitalRead(pin) == LOW? GPIO_LOW: GPIO_HIGH;
     }
 
     void OPiGpio::write(int pin, gpio_state_t state)
     {
-        //assert (pin >= 0);
-
         int new_state = state == GPIO_LOW? LOW: HIGH;
         digitalWrite(pin, new_state);
     }
 //==============================================================
+    OPi1GpioManager::OPi1GpioManager()
+    {
+      wiringPiSetup();
+      last_mode.fill(GPIO_IN); //mark all last state as "input"
+    }
+
     bool OPi1GpioManager::is_manipulated(int pin)
     {
         assert (pin >= 0 && pin < TOTAL_GPIO);
@@ -70,7 +70,7 @@ namespace Gpio
         else
         {
             //TODO:: throw through std::exception
-            throw "Pin " + std::to_string(pin) " is not connected to CPU";
+            throw "Pin " + std::to_string(pin) + " is not connected to CPU";
         }
     }
 
@@ -93,15 +93,15 @@ namespace Gpio
         return ret;
     }
 
-    void OPi1GpioManager::write(int pin, gpio_state_t state)
+    void OPi1GpioManager::write(int pin, gpio_state_t state) 
     {
         assert (pin >= 0 && pin < TOTAL_GPIO);
 
         if (last_mode[pin] == GPIO_IN)
         {
-            opi_gpio.cfg(GPIO_OUT);
+            opi_gpio.cfg(pin, GPIO_OUT);
             write(pin, state);
-            opi_gpio.cfg(GPIO_IN);
+            opi_gpio.cfg(pin, GPIO_IN);
         }
         else
         {
