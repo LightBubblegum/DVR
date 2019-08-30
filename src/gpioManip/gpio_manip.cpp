@@ -124,8 +124,15 @@ namespace Gpio
         for (int i = 0; i < len; ++i)
             this->cfg(p_pin_array[i], mode);
     }
+
+    int OPi1GpioManager::change_prio(int prio)
+    {
+        assert (prio >= 0 && prio <= MAX_GPIO_PRIO);
+
+        //set priority for gpio
+        return piHiPri(prio);
+    }
+
     //==============================================================
 } // namespace gpio
 
-/**
-*/
