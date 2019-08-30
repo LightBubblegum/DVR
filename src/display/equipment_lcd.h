@@ -10,17 +10,20 @@
 
 namespace LcdEq
 {
+  struct win_size_t
+  {
+    size_t x, y, w, h;
+  };
 
-    class TFT_320QVT : public IDispDriver
-    {
+  class TFT_320QVT : public IDispDriver
+  {
     public:
-        TFT_320QVT();
-        bool init() override;
-        void show() override;
-        std::size_t height() override;
-        std::size_t width() override;
-    };
-
+      TFT_320QVT();
+      bool init() override;
+      void show() override;
+      std::size_t height() override;
+      std::size_t width() override;
+  };
 }
 
 #endif /* __EQUIPMENT_LCD_H__ */

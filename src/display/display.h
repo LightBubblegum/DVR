@@ -19,7 +19,7 @@ typedef struct {
 
 class IDispDriver
 {
-public:
+  public:
     virtual ~IDispDriver();
     virtual bool init() = 0;
     virtual void show() = 0;
@@ -29,10 +29,10 @@ public:
 
 class Display
 {
-private:
+  private:
     IDispDriver *monitor;
 
-public:
+  public:
     Display(IDispDriver *);
 };
 
