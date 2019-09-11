@@ -49,7 +49,6 @@ namespace LcdEq
  
       public:
             NOKIA1616(int rst, int cs, int sda, int clk);
-            void init();
             void send_pixel(pixel_rgb_t rgb);
             void send_pixel(rgb_color16bit color);
             void send_pixel(rgb_color16bit color, uint16_t cnt);
@@ -74,10 +73,10 @@ namespace LcdEq
             win_size_t window;
 
             void clk();
-            void send_cmd1616(uint8_t cmd, uint16_t a, uint16_t b);
+            void send(uint16_t data);
             void send_cmd(uint8_t data) { send(SPFD54124B_SEND_CMD | data); }
             void send_data(uint8_t data) { send(SPFD54124B_SEND_DATA | data); }
-            void send(uint16_t data);
+            void send_long_msg(uint8_t cmd, const uint8_t *msg, size_t len);
   };
 }
 #endif /* __SPFD54124B_H__ */

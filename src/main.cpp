@@ -20,8 +20,6 @@ using namespace std;
 //================================================
 static uint8_t convert_to_color(uint8_t val, uint8_t bits);
 //================================================
-//const string path = "/home/egor/dropBox/linux.bmp";
-//const string path = "/home/egor/dropBox/rosa.bmp";
 
 BmpImg bmp;
 LcdEq::NOKIA1616 n1616(RST_PIN, CS_PIN, MOSI_PIN, SCLK_PIN);
@@ -44,7 +42,6 @@ int main(int argc, char *argv[])
     int bmp_width = bmp.get_width();
     int bmp_height = bmp.get_height();
 
-    n1616.init(); // init display
     n1616.fill_background(0xFFFF);
     n1616.set_window(0, 0, bmp_width, bmp_height); //set window size based of loaded picture
 

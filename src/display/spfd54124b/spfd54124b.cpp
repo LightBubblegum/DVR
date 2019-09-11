@@ -8,18 +8,18 @@
 #include "spfd54124b.h"
 
 /* READ COMMAND */
-#define SPFD54124B_CMD_RDDID		  0x04 // ID (1 dummy read + 3 id)
-#define SPFD54124B_CMD_RDDST      0x09 // Status (1 dummy read + 4 info)
-#define SPFD54124B_CMD_RDDPM      0x0A // Power Mode (1 dummy read + 1 info)
-#define SPFD54124B_CMD_RDDMADCTR  0x0B // MADCTR (1 dummy read + 1 info)
-#define SPFD54124B_CMD_RDDCOLMOD  0x0C // Pixel Format (1 dummy read + 1 info)
-#define SPFD54124B_CMD_RDDIM      0x0D // Image Mode (1 dummy read + 1 info)
-#define SPFD54124B_CMD_RDDSM      0x0E // Signal Mode (1 dummy read + 1 info)
-#define SPFD54124B_CMD_RDDSDR     0x0F // Self-diagnostic result (1 dummy read + 1 info)
-#define SPFD54124B_CMD_RAMHD      0x2E // Memory read
+#define SPFD54124B_CMD_RDDID        0x04 // ID (1 dummy read + 3 id)
+#define SPFD54124B_CMD_RDDST        0x09 // Status (1 dummy read + 4 info)
+#define SPFD54124B_CMD_RDDPM        0x0A // Power Mode (1 dummy read + 1 info)
+#define SPFD54124B_CMD_RDDMADCTR    0x0B // MADCTR (1 dummy read + 1 info)
+#define SPFD54124B_CMD_RDDCOLMOD    0x0C // Pixel Format (1 dummy read + 1 info)
+#define SPFD54124B_CMD_RDDIM        0x0D // Image Mode (1 dummy read + 1 info)
+#define SPFD54124B_CMD_RDDSM        0x0E // Signal Mode (1 dummy read + 1 info)
+#define SPFD54124B_CMD_RDDSDR       0x0F // Self-diagnostic result (1 dummy read + 1 info)
+#define SPFD54124B_CMD_RAMHD        0x2E // Memory read
 
 /* WRITE COMMAND */
-#define SPFD54124B_CMD_NOP		    0x00
+#define SPFD54124B_CMD_NOP          0x00
 #define SPFD54124B_CMD_SWRESET    0x01
 #define SPFD54124B_CMD_SLPIN      0x10 // Sleep in & booster off
 #define SPFD54124B_CMD_SLPOUT	    0x11 // Sleep out & booster on
@@ -78,33 +78,23 @@
 
 namespace LcdEq
 {
-    NOKIA1616::NOKIA1616(int rst, int cs, int sda, int clk) : 
-        gpio_man(Gpio::OPi1GpioManager::get_instance()),
-        _rst(rst), _cs(cs), _sda(sda), _clk(clk)
-    {
-        gpio_man.cfg(_rst, Gpio::GPIO_OUT);
-        gpio_man.cfg(_cs, Gpio::GPIO_OUT);
-        gpio_man.cfg(_sda, Gpio::GPIO_OUT);
-        gpio_man.cfg(_clk, Gpio::GPIO_OUT);
+    /*******************************************************
+     *                       private                       *
+     ******************************************************/
 
-        //set size of current window
-        window.x = window.y =  0;
-        window.w = window.h = 0;
-    }
- 
+    /**
+     * @brief Function is used for send clock signal to lcd.
+     *        Each bit getting on front rais of 'clk' signal
+     */
     void NOKIA1616::clk()
     {
         gpio_man.write(_clk, Gpio::GPIO_HIGH);
         gpio_man.write(_clk, Gpio::GPIO_LOW);
     }
-    void NOKIA1616::send_cmd1616(uint8_t cmd, uint16_t a, uint16_t b)
-    {
-        send_cmd(cmd);
-        send_data((a>>8) & 0xFF);
-        send_data(a & 0xFF);
-        send_data((b>>8) & 0xFF);
-        send_data(b & 0xFF);
-    }
+    /**
+     * @brief Function for sending data to lcd
+     * @param data - data which will be send, using only first 9-bits.
+     */
     void NOKIA1616::send(uint16_t data)
     {
         gpio_man.write(_cs, Gpio::GPIO_LOW);
@@ -122,9 +112,43 @@ namespace LcdEq
 
         gpio_man.write(_cs, Gpio::GPIO_HIGH);
     }
-
-    void NOKIA1616::init()
+    /**
+     * @brief This function sent the message with cmd and arrays of data
+     * @param cmd - command for sent
+     * @param msg - pointer to array for send as 'data'
+     * @param len - length of array
+     */
+    void NOKIA1616::send_long_msg(uint8_t cmd, const uint8_t *msg, size_t len)
     {
+        send_cmd(cmd);
+        for(size_t i = 0; i < len; ++i) {
+            send_data(msg[i]);
+        }
+    }
+
+    /*******************************************************
+     *                       public                        *
+     ******************************************************/
+    /**
+     * @brief Constructor for class
+     * @param rst - reset pin (in WiringOP notatio)
+     * @param cs - clock pin (in WiringOP notatio)
+     * @param sda - data pin (in WiringOP notatio)
+     * @param clk - clock pin (in WiringOP notatio)
+     */
+    NOKIA1616::NOKIA1616(int rst, int cs, int sda, int clk) : 
+        gpio_man(Gpio::OPi1GpioManager::get_instance()),
+        _rst(rst), _cs(cs), _sda(sda), _clk(clk)
+    {
+        gpio_man.cfg(_rst, Gpio::GPIO_OUT);
+        gpio_man.cfg(_cs, Gpio::GPIO_OUT);
+        gpio_man.cfg(_sda, Gpio::GPIO_OUT);
+        gpio_man.cfg(_clk, Gpio::GPIO_OUT);
+
+        //set size of current window
+        window.x = window.y =  0;
+        window.w = window.h = 0;
+
         gpio_man.write(_rst, Gpio::GPIO_LOW);
         delay(100); //100ms
         gpio_man.write(_rst, Gpio::GPIO_HIGH);
@@ -143,25 +167,54 @@ namespace LcdEq
         send(SPFD54124B_CMD_INVOFF); //inversion off
         send(SPFD54124B_CMD_NORON); //normal mode on
     }
+
+    /**
+     * @brief This function should be used when you want to send a pixel
+     * @param rgb - color in rgb structure
+     */
     void NOKIA1616::send_pixel(pixel_rgb_t rgb)
     {
         rgb_color16bit color = formate_pixel(rgb);
         send_pixel(color);
     }
+
+    /**
+     * @brief This function should be used when you want to send a pixel
+     * @param color - structure with type of rgb color
+     */
     void NOKIA1616::send_pixel(rgb_color16bit color)
     {
         send_data(color >> 8);
         send_data(color & 0xFF);
     }
+
+    /**
+     * @brief This function should be used when you want to send array of pixels
+     * @param color - structure with type of rgb color
+     * @param cnt - repetition counter
+     */
     void NOKIA1616::send_pixel(rgb_color16bit color, uint16_t cnt)
     {
         while(cnt--) send_pixel(color);
     }
+
+    /**
+     * @brief Set window where pixels will be fulfiled
+     * @param x - start 'x' position
+     * @param y - start 'y' position
+     * @param w - weight of window
+     * @param h - height of window
+     */
     void NOKIA1616::set_window(uint8_t x, uint8_t y, uint8_t w, uint8_t h)
     {
         win_size_t request_windows = { .x = x, .y = y, .w = w, .h = h };
         set_window(request_windows);
     }
+
+    /**
+     * @brief Set window where pixels will be fulfiled
+     * @param winsize - structure with window size param (see win_size_t)
+     */
     void NOKIA1616::set_window(win_size_t winsize)
     {
         if(memcmp(&window, &winsize, sizeof(win_size_t)) == 0)
@@ -174,18 +227,36 @@ namespace LcdEq
             throw "Out of range";
         }
 
+        uint8_t msg[sizeof(uint16_t) * 2];
+        uint16_t data;
         // column start/end
-        send_cmd1616(SPFD54124B_CMD_CASET, winsize.x + x_offset, 
-                                            winsize.x + x_offset + winsize.w - 1);
+        data = winsize.x + x_offset;
+        msg[0] = (data >> 8) & 0xFF;
+        msg[1] = data & 0xFF;
+        data = winsize.x + x_offset + winsize.w - 1;
+        msg[2] = (data >> 8) & 0xFF;
+        msg[3] = data & 0xFF;
+        send_long_msg(SPFD54124B_CMD_CASET, msg, sizeof(msg));
+
         // page start/end
-        send_cmd1616(SPFD54124B_CMD_RASET, winsize.y + y_offset, 
-                                            winsize.y + y_offset + winsize.h - 1);
+        data = winsize.y + y_offset;
+        msg[0] = (data >> 8) & 0xFF;
+        msg[1] = data & 0xFF;
+        data = winsize.y + y_offset + winsize.h - 1;
+        msg[2] = (data >> 8) & 0xFF;
+        msg[3] = data & 0xFF;
+        send_long_msg(SPFD54124B_CMD_RASET, msg, sizeof(msg));
         // RAMWR
         send_cmd(SPFD54124B_CMD_RAMWR);
 
         //update window size
         window = winsize;
     }
+
+    /**
+     * @brief Function for filling window
+     * @param palette - palatte for upload
+     */
     void NOKIA1616::fill_window(std::vector<rgb_color16bit>& palette)
     {
         if(palette.size() > (window.w * window.h))
@@ -201,11 +272,21 @@ namespace LcdEq
           }
         }
     }
+
+    /**
+     * @brief Function for filling window
+     * @param color - color of pixels
+     */
     void NOKIA1616::fill_window(rgb_color16bit color)
     {
         set_window(window); //need to send it to reset (don't know where we are right now)
         send_pixel(color, window.w * window.h); //fill all window with
     }
+
+    /**
+     * @brief Function filling full background of lcd
+     * @param color - color of pixels
+     */
     void NOKIA1616::fill_background(rgb_color16bit color)
     {
         win_size_t ws = window;
@@ -214,10 +295,20 @@ namespace LcdEq
         send_pixel(color, width * height);
         set_window(ws); //return back window size
     }
+
+    /**
+     * @brief Function for getting current window size
+     * @return window size
+     */
     win_size_t NOKIA1616::get_window_size(void)
     {
         return window;
     }
+
+    /**
+     * @brief Implemeatation of inherited interface. 
+     * @return resolution of pixel
+     */
     colors_t<uint8_t> NOKIA1616::get_resolution()
     {
         colors_t<uint8_t> bits;
