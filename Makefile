@@ -27,7 +27,7 @@ SRC = ./src/main.cpp \
 	./src/picture/libbmp.cpp
 OBJ     =       $(SRC:.cpp=.o)
 BINS    =       $(SRC:.cpp=)
-EXECUTABLE = main
+EXECUTABLE = DVR_EXEC
 
 # Should not alter anything below this line
 ###############################################################################
