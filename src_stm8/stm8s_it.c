@@ -2,10 +2,10 @@
   ******************************************************************************
   * @file    stm8s_it.c
   * @author  MCD Application Team
-  * @version V2.3.0
-  * @date    16-June-2017
+  * @version V2.2.0
+  * @date    30-September-2014
   * @brief   Main Interrupt Service Routines.
-  *          This file provides template for all peripherals interrupt service 
+  *          This file provides template for all peripherals interrupt service
   *          routine.
    ******************************************************************************
   * @attention
@@ -18,14 +18,14 @@
   *
   *        http://www.st.com/software_license_agreement_liberty_v2
   *
-  * Unless required by applicable law or agreed to in writing, software 
-  * distributed under the License is distributed on an "AS IS" BASIS, 
+  * Unless required by applicable law or agreed to in writing, software
+  * distributed under the License is distributed on an "AS IS" BASIS,
   * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
   * See the License for the specific language governing permissions and
   * limitations under the License.
   *
   ******************************************************************************
-  */ 
+  */
 
 /* Includes ------------------------------------------------------------------*/
 #include "stm8s_it.h"
@@ -58,6 +58,7 @@ INTERRUPT_HANDLER(NonHandledInterrupt, 25)
 }
 #endif /*_COSMIC_*/
 
+#if 0
 /**
   * @brief TRAP Interrupt routine
   * @param  None
@@ -69,6 +70,7 @@ INTERRUPT_HANDLER_TRAP(TRAP_IRQHandler)
      it is recommended to set a breakpoint on the following instruction.
   */
 }
+#endif /* if 0 */
 
 /**
   * @brief Top Level Interrupt routine.
@@ -167,7 +169,7 @@ INTERRUPT_HANDLER(EXTI_PORTE_IRQHandler, 7)
   */
 }
 
-#if defined (STM8S903) || defined (STM8AF622x) 
+#if defined (STM8S903) || defined (STM8AF622x)
 /**
   * @brief External Interrupt PORTF Interrupt routine.
   * @param  None
@@ -255,7 +257,7 @@ INTERRUPT_HANDLER(TIM1_CAP_COM_IRQHandler, 12)
      it is recommended to set a breakpoint on the following instruction.
   */
  }
- 
+
 /**
   * @brief Timer5 Capture/Compare Interrupt routine.
   * @param  None
@@ -322,7 +324,7 @@ INTERRUPT_HANDLER(TIM1_CAP_COM_IRQHandler, 12)
 #endif /* (STM8S208) || (STM8S207) || (STM8S105) || (STM8AF62Ax) || (STM8AF52Ax) || (STM8AF626x) */
 
 #if defined (STM8S208) || defined(STM8S207) || defined(STM8S007) || defined(STM8S103) || \
-    defined (STM8S003) || defined(STM8S001) || defined (STM8AF62Ax) || defined (STM8AF52Ax) || defined (STM8S903)
+    defined(STM8S003) ||  defined (STM8AF62Ax) || defined (STM8AF52Ax) || defined (STM8S903)
 /**
   * @brief UART1 TX Interrupt routine.
   * @param  None
@@ -346,7 +348,7 @@ INTERRUPT_HANDLER(TIM1_CAP_COM_IRQHandler, 12)
        it is recommended to set a breakpoint on the following instruction.
     */
  }
-#endif /* (STM8S208) || (STM8S207) || (STM8S103) || (STM8S001) || (STM8S903) || (STM8AF62Ax) || (STM8AF52Ax) */
+#endif /* (STM8S208) || (STM8S207) || (STM8S103) || (STM8S903) || (STM8AF62Ax) || (STM8AF52Ax) */
 
 #if defined(STM8AF622x)
 /**
@@ -455,7 +457,7 @@ INTERRUPT_HANDLER(I2C_IRQHandler, 19)
   * @brief ADC1 interrupt routine.
   * @par Parameters:
   * None
-  * @retval 
+  * @retval
   * None
   */
  INTERRUPT_HANDLER(ADC1_IRQHandler, 22)

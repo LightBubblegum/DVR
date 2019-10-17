@@ -4,45 +4,70 @@
 #
 #       Copyright (c) 2019 Egor Plotkin
 
-STACK_SIZE = 256
+OUTDIR 	= "bin"
 
-OUTDIR = "bin"
-CC = sdcc
+#Compiler
+CC 		= sdcc
+
+#Platform
+PLATFORM = stm8
+
+#Product name
+PNAME 	= main
+
 INCLUDE = \
 		  -I./std_drv/inc \
 		  -I./
-OPTIM = --opt-code-size
-LINKER = --out-fmt-ihx --out-fmt-elf --stack-loc $(STACK_SIZE)
 
-CFLAGS = --srd-c99 $(OPTIM) $(LINKER) $(INCLUDE)
+SRC 	= ./main.c \
+		  ./stm8s_it.c
 
-LDLIBS = -lstm8 -mstm8
-SRC = ./main.c \
-	  ./stm8s_it.c \
-	  ./std_drv/src/stm8s_adc1.c \
-	  ./std_drv/src/stm8s_adc2.c \
-	  ./std_drv/src/stm8s_awuc \
-	  ./std_drv/src/stm8s_beep.c \
-	  ./std_drv/src/stm8s_can.c \
-	  ./std_drv/src/stm8s_clk.c \
-	  ./std_drv/src/stm8s_exti.c \
-	  ./std_drv/src/stm8s_flash.c  \
-	  ./std_drv/src/stm8s_gpio.c  \
-	  ./std_drv/src/stm8s_i2c.c  \
-	  ./std_drv/src/stm8s_itc.c  \
-	  ./std_drv/src/stm8s_iwdg.c  \
-	  ./std_drv/src/stm8s_rst.c  \
-	  ./std_drv/src/stm8s_spi.c  \
-	  ./std_drv/src/stm8s_tim1.c  \
-	  ./std_drv/src/stm8s_tim2.c  \
-	  ./std_drv/src/stm8s_tim3.c  \
-	  ./std_drv/src/stm8s_tim4.c  \
- 	  ./std_drv/src/stm8s_tim5.c  \
-	  ./std_drv/src/stm8s_tim6.c  \
-	  ./std_drv/src/stm8s_uart1.c  \
-	  ./std_drv/src/stm8s_uart2.c  \
-	  ./std_drv/src/stm8s_uart3.c  \
-	  ./std_drv/src/stm8s_uart4.c  \
-	  ./std_drv/src/stm8s_wwdg.c
+OPTIM 	= --opt-code-size
+LINKER 	= --out-fmt-ihx 
 
+CFLAGS 	= --std-c99 -m$(PLATFORM) $(OPTIM)
+LDLIBS 	= -l$(PLATFORM)
 
+#In case of ever want a different name for the main source file
+MAINSRC = $(PNAME).c
+
+OBJ 	= $(SRC:.c=.rel)
+BINS 	= $(SRC:.c=)
+HEX 	= $(OUTDIR)/
+
+#
+###############################################################
+.PHONY: clean all tags depend directories build
+.SUFFIXES: .c .rel
+
+all: clean build
+
+build: $(SRC) $(HEX)
+
+$(HEX): directories $(OBJ) 
+	@echo "build $@"
+	@$(CC) $(INCLUDE) $(CFLAGS) $(LDLIBS) $(MAINSRC) $(wildcard $(OUTDIR)/*.rel) -o $(OUTDIR)/
+
+.c.rel: 
+	@echo [CC] $<
+	@$(CC) -c $(INCLUDE) $(CFLAGS) $(LDLIBS) $< -o $(OUTDIR)/$@
+
+clean:
+	@echo "[Clean]"
+	@rm -rf $(OUTDIR)
+#	@rm -f $(OUTDIR)/$(OBJ) *~ core tags $(BINS)
+
+tags: $(SRC)
+	@echo [ctags]
+	@ctags $(SRC)
+
+depend:
+	makedepend -Y $(SRC)
+
+directories: $(OUTDIR)
+
+$(OUTDIR):
+	mkdir -p $(OUTDIR)
+
+# DO NOT DELETE
+###############################################################
