@@ -27,10 +27,14 @@
 
 
 /* Includes ------------------------------------------------------------------*/
+#include <stdint.h>
 #include "stm8s.h"
+#include "stm8s_conf.h"
+#include "stm8s_gpio.h"
 
 /* Private defines -----------------------------------------------------------*/
 /* Private function prototypes -----------------------------------------------*/
+static void gpio_init(void);
 /* Private functions ---------------------------------------------------------*/
 
 void main(void)
@@ -42,6 +46,11 @@ void main(void)
   
 }
 
+static void gpio_init(void)
+{
+  GPIO_Init(GPIOA, GPIO_PIN_2, GPIO_MODE_OUT_PP_LOW_FAST); 
+}
+
 #ifdef USE_FULL_ASSERT
 
 /**
@@ -51,11 +60,13 @@ void main(void)
   * @param line: assert_param error line source number
   * @retval : None
   */
-void assert_failed(u8* file, u32 line)
+void assert_failed(uint8_t* file, uint32_t line)
 { 
   /* User can add his own implementation to report the file name and line number,
      ex: printf("Wrong parameters value: file %s on line %d\r\n", file, line) */
 
+  (void)file;
+  (void)line;
   /* Infinite loop */
   while (1)
   {
